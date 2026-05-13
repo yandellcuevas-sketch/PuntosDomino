@@ -446,9 +446,11 @@ body {
 #screen-game {
     display: flex;
     flex-direction: column;
-    padding-bottom: 40px;
+    height: 100vh;
+    height: 100dvh;
     max-width: 700px;
     margin: 0 auto;
+    overflow: hidden;
 }
 
 /* Topbar */
@@ -893,7 +895,9 @@ body {
 
 /* Hands list */
 .hands-section {
-    padding: 8px 0
+    padding: 8px 0;
+    flex: 1;
+    overflow-y: auto;
 }
 
 .hands-list {

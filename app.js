@@ -85,11 +85,17 @@ function showScreen(id) {
 
 // ─── Persistencia ─────────────────────────────────────────────────
 function saveGame() {
-    if (state.game) localStorage.setItem(LS_GAME, JSON.stringify(state.game));
-    else localStorage.removeItem(LS_GAME);
+    if (state.game) {
+        localStorage.setItem(LS_GAME, JSON.stringify(state.game));
+        if (typeof fb_saveGame === 'function') fb_saveGame(state.game);
+    } else {
+        localStorage.removeItem(LS_GAME);
+        if (typeof fb_saveGame === 'function') fb_saveGame(null);
+    }
 }
 function saveHistory() {
     localStorage.setItem(LS_HISTORY, JSON.stringify(state.history));
+    if (typeof fb_saveHistory === 'function') fb_saveHistory(state.history);
 }
 function loadStorage() {
     try {
@@ -1026,6 +1032,32 @@ function initEditModal() {
 // ─── Init ─────────────────────────────────────────────────────────
 function init() {
     loadStorage();
+
+    // Listeners de Firebase para sincronización en tiempo real
+    if (typeof fb_onGameChange === 'function') {
+        fb_onGameChange((gameData) => {
+            state.game = gameData;
+            if (state.game) {
+                if (typeof renderGameScreen === 'function') renderGameScreen();
+                // Si el juego terminó y no se ha mostrado el modal
+                if (state.game.status === 'finished' && !state.game._modalShown) {
+                    if (typeof showWinnerModal === 'function') showWinnerModal();
+                    state.game._modalShown = true;
+                    saveGame(); // Actualiza localmente
+                }
+            } else {
+                showScreen('screen-setup');
+            }
+        });
+    }
+
+    if (typeof fb_onHistoryChange === 'function') {
+        fb_onHistoryChange((historyList) => {
+            state.history = historyList;
+            if (typeof renderHistory === 'function') renderHistory();
+        });
+    }
+
     initSetupScreen();
     initGameControls();
     initHistoryControls();

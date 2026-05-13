@@ -332,6 +332,7 @@ let selectedTeam = null;
 function renderGameScreen() {
     if (!state.game) return;
     const g = state.game;
+    if (!g.hands) g.hands = []; // Firebase RTDB no guarda arrays vacíos
 
     // Topbar
     $('game-title-bar').textContent = g.name;

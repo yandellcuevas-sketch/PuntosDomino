@@ -448,6 +448,12 @@ function renderHands() {
         const capiTag = h.capi ? '<span class="capi-tag">CAPI</span>' : '';
         const time = new Date(h.time);
         const timeStr = time.toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' });
+        const actionsHtml = state.isSpectator ? '' : `
+      <div class="hand-actions">
+        <button class="btn-hand edit" onclick="openEditModal('${h.id}')">Editar</button>
+        <button class="btn-hand delete" onclick="confirmDeleteHand('${h.id}')">✕</button>
+      </div>`;
+
         html += `
     <div class="hand-row ${colorClass}" data-id="${h.id}">
       <div class="hand-num">#${idx}</div>
@@ -456,10 +462,7 @@ function renderHands() {
         <span class="hand-meta">${timeStr} · Acum: ${getAccumAt(g.hands.length - 1 - ri)}</span>
       </div>
       <div class="hand-pts">+${h.points}</div>
-      <div class="hand-actions">
-        <button class="btn-hand edit" onclick="openEditModal('${h.id}')">Editar</button>
-        <button class="btn-hand delete" onclick="confirmDeleteHand('${h.id}')">✕</button>
-      </div>
+      ${actionsHtml}
     </div>`;
     });
     container.innerHTML = html;
@@ -1124,8 +1127,7 @@ function applySpectatorMode() {
     if (state.isSpectator) {
         const panel = document.querySelector('.input-panel');
         if (panel) {
-            panel.style.opacity = '0.3';
-            panel.style.pointerEvents = 'none';
+            panel.style.display = 'none';
         }
         const btnBack = $('btn-back-to-setup');
         if (btnBack) btnBack.title = "Salir de la sala";

@@ -355,11 +355,19 @@ function renderGameScreen() {
     updateScoreboard();
     renderHands();
 
-    // Lock if finished
-    if (g.status === 'finished') {
-        $('input-panel').classList.add('locked');
-    } else {
-        $('input-panel').classList.remove('locked');
+    // Lock or hide based on status and spectator mode
+    const panel = $('input-panel');
+    if (panel) {
+        if (state.isSpectator) {
+            panel.style.display = 'none';
+        } else {
+            panel.style.display = ''; // Revertir a CSS (flex)
+            if (g.status === 'finished') {
+                panel.classList.add('locked');
+            } else {
+                panel.classList.remove('locked');
+            }
+        }
     }
 
     // Show winner modal if finished and not yet dismissed

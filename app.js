@@ -524,6 +524,11 @@ function registerPoints(pts, isCapi) {
     g.hands.push(hand);
     g.teams[selectedTeam - 1].score += finalPts;
 
+    // Deseleccionar equipo para evitar anotaciones accidentales
+    selectedTeam = null;
+    $('sel-t1').classList.remove('selected');
+    $('sel-t2').classList.remove('selected');
+
     // Check winner
     const won = checkWinner();
     saveGame();

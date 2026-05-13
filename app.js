@@ -316,9 +316,13 @@ function startGame() {
         });
     }
     
-    if (typeof renderGameScreen === 'function') renderGameScreen();
-    if ($('lbl-game-code')) $('lbl-game-code').textContent = state.game.code || '----';
-    showScreen('screen-game');
+    try {
+        if (typeof renderGameScreen === 'function') renderGameScreen();
+        if ($('lbl-game-code')) $('lbl-game-code').textContent = state.game.code || '----';
+        showScreen('screen-game');
+    } catch (e) {
+        alert('Error al iniciar pantalla de juego: ' + e.message);
+    }
     playTone(440, 'sine', 0.2, 0.15);
 }
 

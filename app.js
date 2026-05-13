@@ -451,22 +451,18 @@ function initGameControls() {
         });
     });
 
-    // Quick buttons
+    // Quick buttons (solo numéricos)
     document.querySelectorAll('.qbtn').forEach(btn => {
         btn.addEventListener('click', () => {
-            if (btn.id === 'qbtn-capi') {
-                registerPoints(null, true);
-            } else {
-                const pts = parseInt(btn.dataset.pts);
-                registerPoints(pts, false);
-            }
+            const pts = parseInt(btn.dataset.pts);
+            registerPoints(pts, false);
         });
     });
 
     $('btn-register').addEventListener('click', () => {
         const pts = parseInt($('manual-pts').value);
         const capi = $('chk-capi').checked;
-        if (isNaN(pts)) return showGameError('Ingresa una cantidad de puntos.');
+        if (isNaN(pts) || $('manual-pts').value === '') return showGameError('Ingresa una cantidad de puntos.');
         registerPoints(pts, capi);
         $('manual-pts').value = '';
         $('chk-capi').checked = false;
@@ -513,18 +509,9 @@ function registerPoints(pts, isCapi) {
     const capiValue = g.capiValue;
     let finalPts = 0;
 
-    if (isCapi) {
-        finalPts = capiValue;
-    } else {
-        if (isNaN(pts) || pts === null) return showGameError('Puntos inválidos.');
-        if (pts < 0) return showGameError('No se aceptan puntos negativos.');
-        finalPts = pts;
-        // If also capi checkbox is on add value
-        if ($('chk-capi') && $('chk-capi').checked) {
-            finalPts = capiValue;
-            isCapi = true;
-        }
-    }
+    if (isNaN(pts) || pts === null) return showGameError('Puntos inválidos.');
+    if (pts < 0) return showGameError('No se aceptan puntos negativos.');
+    finalPts = pts + (isCapi ? capiValue : 0);
 
     const hand = {
         id: uid(),

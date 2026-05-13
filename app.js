@@ -529,6 +529,16 @@ function initGameControls() {
     });
     $('btn-sound-game').addEventListener('click', toggleSound);
     $('btn-new-game').addEventListener('click', newGame);
+
+    const btnShare = $('btn-share-whatsapp');
+    if (btnShare) {
+        btnShare.addEventListener('click', () => {
+            if (!state.game || !state.game.code) return;
+            const text = `¡Únete a mi partida de dominó! Código de sala: ${state.game.code}. Entra aquí: ${window.location.href}`;
+            const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        });
+    }
 }
 
 function showGameError(msg) {

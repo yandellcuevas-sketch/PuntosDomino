@@ -52,9 +52,7 @@ function fb_onGameChange(callback) {
     
     activeGameRef = db.ref(`games/${currentRoomCode}`);
     activeGameRef.on('value', (snapshot) => {
-        if (snapshot.exists()) {
-            callback(snapshot.val());
-        }
+        callback(snapshot.exists() ? snapshot.val() : null);
     }, e => console.error("Error en listener de partida:", e));
     return activeGameRef;
 }

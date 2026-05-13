@@ -110,10 +110,24 @@ function loadStorage() {
     state.soundEnabled = s === null ? true : s === 'true';
 }
 
+function generateShortCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+}
+
 // ─── Crear partida ────────────────────────────────────────────────
 function buildGame(cfg) {
+    const gameCode = generateShortCode();
+    if (typeof fb_setRoomCode === 'function') fb_setRoomCode(gameCode);
+    state.isSpectator = false; // El creador no es espectador
+    
     return {
         id: uid(),
+        code: gameCode,
         name: cfg.name,
         startTime: now(),
         endTime: null,
@@ -290,7 +304,20 @@ function startGame() {
 
     state.game = buildGame(v);
     saveGame();
-    renderGameScreen();
+    
+    // Activar listener para la nueva sala
+    if (typeof fb_onGameChange === 'function') {
+        fb_onGameChange((gameData) => {
+            state.game = gameData;
+            if (state.game) {
+                if (typeof renderGameScreen === 'function') renderGameScreen();
+                if ($('lbl-game-code')) $('lbl-game-code').textContent = state.game.code || '----';
+            }
+        });
+    }
+    
+    if (typeof renderGameScreen === 'function') renderGameScreen();
+    if ($('lbl-game-code')) $('lbl-game-code').textContent = state.game.code || '----';
     showScreen('screen-game');
     playTone(440, 'sine', 0.2, 0.15);
 }
@@ -1029,6 +1056,67 @@ function initEditModal() {
     });
 }
 
+function initJoinControls() {
+    const btnJoin = $('btn-join');
+    if (!btnJoin) return;
+    
+    btnJoin.addEventListener('click', () => {
+        const codeInput = $('join-code');
+        const code = codeInput.value.trim().toUpperCase();
+        
+        if (!code) {
+            showJoinError("Introduce un código de sala.");
+            return;
+        }
+        
+        showJoinError(""); // Limpiar error
+        
+        if (typeof fb_setRoomCode === 'function') {
+            fb_setRoomCode(code);
+        }
+        
+        state.isSpectator = true; // Entra como espectador
+        
+        // Activar listener para esa sala
+        if (typeof fb_onGameChange === 'function') {
+            fb_onGameChange((gameData) => {
+                state.game = gameData;
+                if (state.game) {
+                    if (typeof renderGameScreen === 'function') renderGameScreen();
+                    if ($('lbl-game-code')) $('lbl-game-code').textContent = state.game.code || '----';
+                    showScreen('screen-game');
+                    applySpectatorMode();
+                } else {
+                    showJoinError("No se encontró la partida o fue borrada.");
+                }
+            });
+        }
+    });
+}
+
+function showJoinError(msg) {
+    const el = $('join-error');
+    if (!el) return;
+    if (msg) {
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    } else {
+        el.classList.add('hidden');
+    }
+}
+
+function applySpectatorMode() {
+    if (state.isSpectator) {
+        const panel = document.querySelector('.input-panel');
+        if (panel) {
+            panel.style.opacity = '0.3';
+            panel.style.pointerEvents = 'none';
+        }
+        const btnBack = $('btn-back-to-setup');
+        if (btnBack) btnBack.title = "Salir de la sala";
+    }
+}
+
 // ─── Init ─────────────────────────────────────────────────────────
 function init() {
     loadStorage();
@@ -1058,6 +1146,7 @@ function init() {
         });
     }
 
+    initJoinControls();
     initSetupScreen();
     initGameControls();
     initHistoryControls();
@@ -1067,7 +1156,8 @@ function init() {
 
     // Decide which screen to show
     if (state.game) {
-        renderGameScreen();
+        if (typeof renderGameScreen === 'function') renderGameScreen();
+        if ($('lbl-game-code')) $('lbl-game-code').textContent = state.game.code || '----';
         showScreen('screen-game');
         // If game was finished, show winner modal again (without music)
         if (state.game.status === 'finished' && !state.game._modalShown) {

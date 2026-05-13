@@ -24,28 +24,39 @@ if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "TU_API_KEY") {
     console.log("Firebase no configurado. La aplicación funcionará en modo local (localStorage).");
 }
 
-const PATH_GAME = 'games/partida_actual';
+let currentRoomCode = 'partida_actual';
+let activeGameRef = null;
 const PATH_HISTORY = 'history/full_history';
+
+function fb_setRoomCode(code) {
+    if (activeGameRef) {
+        activeGameRef.off(); // Limpiar listener anterior
+        activeGameRef = null;
+    }
+    currentRoomCode = code;
+}
 
 // ─── Funciones de Sincronización ──────────────────────────────────
 
 // Guardar la partida activa
 function fb_saveGame(gameData) {
     if (!db) return;
-    db.ref(PATH_GAME).set(gameData)
+    db.ref(`games/${currentRoomCode}`).set(gameData)
         .catch(e => console.error("Error al guardar partida en Firebase:", e));
 }
 
 // Escuchar cambios en la partida activa en tiempo real
 function fb_onGameChange(callback) {
     if (!db) return null;
-    const ref = db.ref(PATH_GAME);
-    ref.on('value', (snapshot) => {
+    if (activeGameRef) activeGameRef.off(); // Limpiar por si acaso
+    
+    activeGameRef = db.ref(`games/${currentRoomCode}`);
+    activeGameRef.on('value', (snapshot) => {
         if (snapshot.exists()) {
             callback(snapshot.val());
         }
     }, e => console.error("Error en listener de partida:", e));
-    return ref;
+    return activeGameRef;
 }
 
 // Guardar el historial completo

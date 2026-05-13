@@ -294,6 +294,7 @@ function showSetupError(msg) {
 }
 
 function startGame() {
+    alert('Click en Iniciar Partida');
     const v = getSetupValues();
     if (!v.t1p1) return showSetupError('Ingresa el nombre del Jugador 1 del Equipo 1.');
     if (!v.t1p2) return showSetupError('Ingresa el nombre del Jugador 2 del Equipo 1.');

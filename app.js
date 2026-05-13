@@ -1136,6 +1136,11 @@ function applySpectatorMode() {
 function init() {
     loadStorage();
 
+    // Si hay una partida guardada localmente, usar su código de sala
+    if (state.game && state.game.code) {
+        if (typeof fb_setRoomCode === 'function') fb_setRoomCode(state.game.code);
+    }
+
     // Listeners de Firebase para sincronización en tiempo real
     if (typeof fb_onGameChange === 'function') {
         fb_onGameChange((gameData) => {

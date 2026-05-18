@@ -24,6 +24,16 @@ function getAudioCtx() {
     return audioCtx;
 }
 
+async function vibrate(type = 'Light') {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+        try {
+            await window.Capacitor.Plugins.Haptics.impact({ style: type });
+        } catch (e) {}
+    } else if (navigator.vibrate) {
+        navigator.vibrate(type === 'Light' ? 50 : 100);
+    }
+}
+
 function playTone(freq = 440, type = 'sine', duration = 0.15, vol = 0.15) {
     if (!state.soundEnabled) return;
     try {
@@ -42,19 +52,24 @@ function playTone(freq = 440, type = 'sine', duration = 0.15, vol = 0.15) {
 }
 
 function soundScore() {
+    vibrate('Light');
     playTone(660, 'sine', 0.12, 0.12);
     setTimeout(() => playTone(880, 'sine', 0.1, 0.08), 80);
 }
 function soundCapicua() {
+    vibrate('Medium');
     [440, 550, 660, 880].forEach((f, i) => setTimeout(() => playTone(f, 'triangle', 0.15, 0.15), i * 80));
 }
 function soundWin() {
+    vibrate('Heavy');
     [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.3, 0.18), i * 120));
 }
 function soundLisa() {
+    vibrate('Heavy');
     [220, 330, 440, 660, 880, 1100].forEach((f, i) => setTimeout(() => playTone(f, 'sawtooth', 0.18, 0.12), i * 70));
 }
 function soundError() {
+    vibrate('Light');
     playTone(180, 'square', 0.2, 0.1);
 }
 
@@ -1201,3 +1216,17 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// --- Capacitor App Back Button ------------------------------------
+if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+    window.Capacitor.Plugins.App.addListener('backButton', () => {
+        const currentScreen = document.querySelector('.screen.active');
+        if (currentScreen && currentScreen.id === 'screen-game') {
+            btn-back-to-setup.click();
+        } else if (currentScreen && currentScreen.id === 'screen-history') {
+            btn-back-from-history.click();
+        } else {
+            window.Capacitor.Plugins.App.exitApp();
+        }
+    });
+}

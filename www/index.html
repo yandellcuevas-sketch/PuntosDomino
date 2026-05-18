@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>DominóScore — Marcador Premium</title>
     <link rel="stylesheet" href="style.css" />
     <!-- Google Fonts -->
@@ -415,12 +415,11 @@
     <!-- Hidden file input for import -->
     <input type="file" id="import-file" accept=".json" class="hidden" />
 
-    <!-- Firebase SDK (Compat) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Firebase custom logic -->
-    <script src="firebase.js"></script>
+    <!-- Supabase custom logic -->
+    <script src="supabase.js"></script>
 
     <script src="app.js"></script>
 </body>
